@@ -13,6 +13,7 @@
   - [[#docker-implementation][Docker implementation:]]
   - [[#automatic-testing][Automatic testing:]]
   - [[#qt-installer][QT Installer:]]
+- [[#linux-based-installer][Linux Based Installer:]]
 
 * Main Goals:
 
@@ -41,17 +42,17 @@ These distributions ship with their own package-manager and tools, so a well def
 
 A well defined script for linux users with the following criteria:
 
-*** Distro-Specific installer
-*** Python-installer
-*** Creating Python virtual env
-*** Installing dependencies inside of venv
+ - Distro-Specific installer
+ - Python-installer
+ - Creating Python virtual env
+ - Installing dependencies inside of venv
 
 * Long-Term Goals:
 
-*** Container-Based Dockerfiles for the 3 supported distributions.
-*** Docker implementation of the Plugin.
-*** Automatic testing of the installer.
-*** QT based installer.
+ - Container-Based Dockerfiles for the 3 supported distributions.
+ - Docker implementation of the Plugin.
+ - Automatic testing of the installer.
+ - QT based installer.
 
 ** Container-Based testing:
 
@@ -71,3 +72,8 @@ Runs the 3 Dockerfiles simultaneously and creates 3 logfiles in the /Logs direct
 ** QT Installer:
 
 Build and transform the bash script into a python-based QT/tkinter installer, try to keep the bash script as a runtime and build a GUI interface on top of the installer options. 
+
+
+* Linux Based Installer:
+
+A bash script that checks the users 
