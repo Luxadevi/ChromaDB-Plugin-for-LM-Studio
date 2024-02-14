@@ -1,0 +1,73 @@
+#+AUTHOR: Luxa
+#+TITLE: Linux Documentation
+#+DESCRIPTION: Documentation about Linux usecases and research for the ChromaDB-Plugin-for-LM-Studio by BBC-Esq.
+#+OPTIONS: :TOC: 2 
+
+
+* TABLE OF CONTENTS :toc:
+- [[#main-goals][Main Goals:]]
+  - [[#overview][Overview:]]
+  - [[#install-script][Install script]]
+- [[#long-term-goals][Long-Term Goals:]]
+  - [[#container-based-testing][Container-Based testing:]]
+  - [[#docker-implementation][Docker implementation:]]
+  - [[#automatic-testing][Automatic testing:]]
+  - [[#qt-installer][QT Installer:]]
+
+* Main Goals:
+
+** Overview:
+
+This document will be a resource for the Linux implementations of the ChromaDB-Plugin-for-LM-Studio by BBC-Esq
+and provides information related to installing and running of this tool.
+
+Also provides concepts and ideas around testing the install script for the following linux distributions:
+
+*** Arch
+
+Arch would be distro's like Manjaro and EndeavourOS.
+
+*** Debian-Based 
+
+Debian would be distro's like Ubuntu, Mint, Pop!OS, ElementaryOS.
+
+*** RHEL-Based 
+
+RHEL would distro's like Fedora, Rocky, CentOS.
+
+These distributions ship with their own package-manager and tools, so a well defined script for every distro would be the goal.
+
+** Install script 
+
+A well defined script for linux users with the following criteria:
+
+*** Distro-Specific installer
+*** Python-installer
+*** Creating Python virtual env
+*** Installing dependencies inside of venv
+
+* Long-Term Goals:
+
+*** Container-Based Dockerfiles for the 3 supported distributions.
+*** Docker implementation of the Plugin.
+*** Automatic testing of the installer.
+*** QT based installer.
+
+** Container-Based testing:
+
+Write 3 Dockerfiles for testing if the install script is succesfull.
+
+** Docker implementation:
+
+Write a Dockerfile (Ubuntu-Based) containerizing the workflow and useage of the Plugin.
+
+Rebuilding the Plugin to a containerized format has some quirks and drawbacks, see :container: for more info.
+
+** Automatic testing:
+
+Define a workflow for testing the succesfullness of installing and launching the plugin and creating logfiles regarding the test.
+Runs the 3 Dockerfiles simultaneously and creates 3 logfiles in the /Logs directory.
+
+** QT Installer:
+
+Build and transform the bash script into a python-based QT/tkinter installer, try to keep the bash script as a runtime and build a GUI interface on top of the installer options. 
