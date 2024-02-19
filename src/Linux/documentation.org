@@ -1,23 +1,13 @@
 #+AUTHOR: Luxa
-#+TITLE: Linux Documentation
+#+TITLE: Linux Documentation for ChromaDB-Plugin-for-LM-Studio 
 #+DESCRIPTION: Documentation about Linux usecases and research for the ChromaDB-Plugin-for-LM-Studio by BBC-Esq.
 #+OPTIONS: :TOC: 2 
+#+PROPERTY: header-args :tangle installer.sh
 
 
-* TABLE OF CONTENTS :toc:
-- [[#main-goals][Main Goals:]]
-  - [[#overview][Overview:]]
-  - [[#install-script][Install script]]
-- [[#long-term-goals][Long-Term Goals:]]
-  - [[#container-based-testing][Container-Based testing:]]
-  - [[#docker-implementation][Docker implementation:]]
-  - [[#automatic-testing][Automatic testing:]]
-  - [[#qt-installer][QT Installer:]]
-- [[#linux-based-installer][Linux Based Installer:]]
+* Main Goals
 
-* Main Goals:
-
-** Overview:
+** Overview
 
 This document will be a resource for the Linux implementations of the ChromaDB-Plugin-for-LM-Studio by BBC-Esq
 and provides information related to installing and running of this tool.
@@ -28,11 +18,11 @@ Also provides concepts and ideas around testing the install script for the follo
 
 Arch would be distro's like Manjaro and EndeavourOS.
 
-*** Debian-Based 
+*** Debian-Based:
 
 Debian would be distro's like Ubuntu, Mint, Pop!OS, ElementaryOS.
 
-*** RHEL-Based 
+*** RHEL-Based:
 
 RHEL would distro's like Fedora, Rocky, CentOS.
 
@@ -52,7 +42,7 @@ A well defined script for linux users with the following criteria:
  - Container-Based Dockerfiles for the 3 supported distributions.
  - Docker implementation of the Plugin.
  - Automatic testing of the installer.
- - QT based installer.
+ - QT/UI based installer.
 
 ** Container-Based testing:
 
@@ -69,11 +59,166 @@ Rebuilding the Plugin to a containerized format has some quirks and drawbacks, s
 Define a workflow for testing the succesfullness of installing and launching the plugin and creating logfiles regarding the test.
 Runs the 3 Dockerfiles simultaneously and creates 3 logfiles in the /Logs directory.
 
-** QT Installer:
+** QT/GUI Installer:
 
 Build and transform the bash script into a python-based QT/tkinter installer, try to keep the bash script as a runtime and build a GUI interface on top of the installer options. 
 
 
 * Linux Based Installer:
 
-A bash script that checks the users 
+Details about the shell script are defined here.
+
+The script needs to install the following dependencies.
+
+** Linux dependency list.
+
+*General-Packages*
+- PciUtils
+- Python3.10+
+- Python3.10-venv or above
+- Git
+- Git_LFS
+- Make/Cmake
+- Pandoc
+*Nvidia*
+- Nvidia-Utils
+- Cuda
+- Nvml
+- Nvidia-Toolkit
+*AMD*
+- mesa-vulkan-drivers
+- libdrm-amdgpu1
+- Rocm
+*Packages to test*
+- portaudio19-dev
+- python3-dev
+- libxcb-cursor0
+*Python-libs*
+- Everything within req.txt
+- Pytorch 
+- Torchvision
+- TorchAudio
+- xformers
+- nvidia-ml
+- bitsandbyes
+
+** Steps:
+
+1. Check if python 3.10+ and up is installed
+2. Check if python-venv is installed.
+3. Install General-Packages.
+4. Install GPU-Related packages.
+
+
+** Setting up shell script:
+
+This is the start of every shellscript here we define what shell to use when running the script, we use a "shebang" to define where this is located:
+
+#+begin_src shell
+#+/bin/bash
+
+
+#+end_src
+
+** General packages:
+
+Here we define what packages generally needed to be installed on the system and is the same for al 3 linux distro's.
+Also we define what packages would be needed for a nvidia/amd install
+
+#+begin_src sh
+
+COMMON_PACKAGES="pciutils python3.10 pyhton3.10-venv git make pandoc"
+NVIDIA_PACKAGES="cuda nvidia-drivers nvidia-utils"
+AMD_PACKAGES="mesa-vulkan-drivers rocm"
+#+end_src
+
+** Version of installer: 
+
+We define a variable for the installer, this will give us in the future the option to do a check against and if there is a new version we can let the user update:
+
+#+begin_src sh
+
+VERSION="1"
+LOGFILE="Linux/logs/installer.log"
+
+#+end_src
+
+** Check what OS/Distro:
+
+Check what distro the user is running and change the installer depending on the outcome:
+
+#+begin_src sh
+
+OS="Unknown"
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+fi
+
+#+end_src
+
+** Step Check if python 3.10+ is installed:
+
+#+begin_src sh
+
+check_python() {
+    PYTHON_VERSION=$(python3 --version 2>/dev/null | grep -oP '(?<=Python )\d+\.\d+')
+    PYTHON_VENV_PACKAGE="python3.10-venv" 
+
+    if [[ $PYTHON_VERSION < 3.10 ]]; then
+        echo "Python 3.10 or higher is not installed. Please install it using your distribution's package manager."
+        case $1 in
+            "Ubuntu"|"Debian")
+                echo "Run: sudo apt install python3.10 python3.10-venv (or higher)" 
+                ;;
+            "Arch")
+                echo "Run: sudo pacman -S python3.10 python3.10-venv (or higher)"  Adjust if package names differ
+                ;;
+            "RedHat")
+                echo "Run: sudo yum install python3.10 python3.10-venv (or higher)" # Adjust if package names differ
+                ;;
+            *)
+                echo "Unsupported distribution."
+                ;;
+        esac
+    else
+        echo "Python 3.10 or higher is installed."
+    fi
+}
+
+
+#+end_src
+
+
+** Install general packages:
+
+Installs from the COMMON_PACKAGES variable:
+
+#+begin_src sh
+
+install_packages() {
+    if [[ "$1" == "Ubuntu" || "$1" == "Debian" ]]; then
+        sudo apt update
+        sudo apt install software-properies-common -y
+        sudo add-apt-repository ppa:deadsnakes/ppa -y 
+        sudo apt install -y $COMMON_PACKAGES
+    elif [[ "$1" == "Arch" ]]; then
+        sudo pacman -Syu
+        sudo pacman -S $COMMON_PACKAGES
+    elif [[ "$1" == "RedHat" ]]; then
+        sudo yum update
+        sudo yum install -y $COMMON_PACKAGES
+    fi
+}
+
+#+end_src
+
+** Check what gpu is available:
+
+We use from the package pciutils the "lspci" command and search if we get a hit on the graphics card and asks the user if they want to install packages if they are not available on the system.
+
+
+** Check directory for clone:
+
+Here we check what directory this script is run for and downloads the latest release accordingly:
+
